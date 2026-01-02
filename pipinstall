@@ -1,0 +1,4 @@
+
+pip install gradio torch transformers peft qwen-vl-utils accelerate bitsandbytes torchvision
+
+#dont tun this script instead run it on terminal after creating venv
