@@ -10,7 +10,7 @@ import torch
 import gradio as gr
 from PIL import Image
 
-from transformers import Qwen2VLForConditionalGeneration, AutoProcessor, BitsAndBytesConfig
+from transformers import Qwen2_5_VLForConditionalGeneration, AutoProcessor, BitsAndBytesConfig
 from peft import PeftModel
 from qwen_vl_utils import process_vision_info
 
@@ -65,7 +65,7 @@ def load_model_and_processor(
     dtype: torch.dtype,
     load_4bit: bool,
     merge_lora: bool,
-) -> Tuple[Qwen2VLForConditionalGeneration, AutoProcessor]:
+) -> Tuple[Qwen2_5_VLForConditionalGeneration, AutoProcessor]:
     # Force single-device placement to avoid PEFT offload-index rewrite errors.
     device_map = {"": device}
 
@@ -78,12 +78,12 @@ def load_model_and_processor(
             bnb_4bit_compute_dtype=dtype if dtype in (torch.float16, torch.bfloat16) else torch.float16,
         )
 
-    model = Qwen2VLForConditionalGeneration.from_pretrained(
+    model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
         base_model,
         torch_dtype=None if load_4bit else dtype,
         device_map=device_map,
         quantization_config=quant_cfg,
-        low_cpu_mem_usage=False,  # materialize weights; avoids meta/offload paths
+        low_cpu_mem_usage=False,
     )
 
     # Load LoRA adapter from ./qwen_vizwiz_model
@@ -185,7 +185,7 @@ class QwenVizWizApp:
 
 
 def build_ui(app: QwenVizWizApp) -> gr.Blocks:
-    with gr.Blocks(css=CSS, title="Qwen VizWiz VQA") as demo:
+    with gr.Blocks(title="Qwen VizWiz VQA") as demo:
         gr.Markdown("# Qwen2-VL VizWiz VQA")
 
         with gr.Row():
@@ -248,7 +248,7 @@ def main():
     )
 
     ui = build_ui(app)
-    ui.launch(server_name=args.host, server_port=args.port, share=bool(args.share))
+    ui.launch(server_name=args.host, server_port=args.port, share=bool(args.share), css=CSS)
 
 
 if __name__ == "__main__":
